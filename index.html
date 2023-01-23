@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title></title>
+	<style type="text/css">
+		* {
+		  box-sizing: border-box;
+		}
+	</style>
+</head>
+<body>
+	<style type="text/css">
+		#rss-feed * {
+			font-family: Merriweather, serif
+		}
+		#rss-feed {
+			box-shadow: 0px 3px 5px #eee;
+			border-radius: 10px;
+			border-top: 1px solid #eee;
+			border-left: 1px solid #eee;
+			border-right: 1px solid #eee;
+		    border-bottom: 1px solid rgba(34,110,147,1);
+		    overflow: hidden;
+
+			width: 100%;
+			height: 100%;
+			display: flex;
+			flex-direction: column;
+			flex-wrap: nowrap;
+			justify-content: flex-start;
+			align-items: stretch;
+			align-content: stretch;
+			box-sizing: border-box;
+		}
+
+		#rss-feed-scroll {
+			height: 100%;
+		    overflow-y: auto;
+		    overflow-x: hidden;
+		}
+
+		#rss-feed-title {
+			width: 100%;
+			padding: 15px;
+			color: rgba(34,110,147,1);
+			font-family: 'PT Sans', sans-serif;
+			font-size: 19pt;
+			font-weight: 700;
+			line-height: 1.4;
+			text-align: center;
+			border-bottom: 3px solid rgba(34,110,147,1);
+    		background: #f7f7f7;
+		}
+
+		#rss-feed-list {
+			display: flex;
+			flex-direction: column;
+			padding: 0 10px;
+		}
+
+		.rss-feed-list-item {
+			height: 155px;
+			border-radius: 5px;
+			margin-bottom: 10px;
+			overflow: hidden;
+
+			box-shadow: 1px 1px 3px rgb(0 0 0 / 10%);
+		    background-color: #fbfbfb;
+		    border: 1px solid #ddd;
+		}
+
+		.rss-feed-list-item-card {
+			display: block;
+			width: 100%;
+		    height: 100%;
+		}
+
+		.rss-feed-list-item-card-body {
+		    height: 100%;
+		    border-radius: 5px;
+		    display: flex;
+		    flex-direction: row;
+		}
+
+		.rss-feed-list-item-card-body-img {
+			border-radius: 0px;
+		    min-width: 125px;
+		    width: 250px;
+		    max-width: 250px;
+		    flex: 1 1 0%;
+		    overflow: hidden;
+		    background: #dddddd;
+		}
+
+		.rss-feed-list-item-card-body-img img {
+			display: block;
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+
+		.rss-feed-list-item-card-body-summary {
+			flex: 2 1 0%;
+		    display: flex;
+		    flex-direction: column;
+		    padding: 5px 16px;
+		    overflow: hidden;
+		    text-align: left;
+		}
+
+		.rss-feed-list-item-card-body-summary-title {
+			display: flex;
+		    align-items: center;
+		    font-size: 12px;
+		    line-height: 26.4px;
+		    color: rgb(116, 116, 116);
+		    height: 30px;
+		}
+
+		.rss-feed-list-item-card-body-summary-title-name {
+			color: rgb(1, 153, 255);
+		    font-size: 12px;
+		    text-transform: uppercase;
+		    line-height: inherit;
+		    letter-spacing: 0.1px;
+		    display: block !important;
+		    overflow: hidden;
+		    white-space: nowrap;
+		    text-overflow: ellipsis;
+		}
+
+		.rss-feed-list-item-card-body-summary-title-date {
+			line-height: inherit;
+		    white-space: nowrap;
+		    font-size: 12px;
+		    margin-left: 10px;
+		    color: rgb(116, 116, 116);
+		}
+
+		.rss-feed-list-item-card-body-summary-content {
+			display: flex;
+		    flex-direction: column;
+		    flex: 2 1 0%;
+		    text-align: left;
+		}
+
+		.rss-feed-list-item-card-body-summary-content-title {
+			line-height: 24px;
+		    font-size: 18px;
+		    -webkit-line-clamp: 2;
+		    font-weight: 600;
+		    font-style: initial;
+		    text-align: left;
+		    overflow: hidden;
+		    text-overflow: ellipsis;
+		    display: -webkit-box;
+		    -webkit-box-orient: vertical;
+		    margin: 5px 0 10px;
+
+		    color: rgb(18, 19, 20);
+		    font-size: 18px;
+		    line-height: 24px;
+		    -webkit-line-clamp: 2;
+		    font-weight: 600;
+		    font-style: initial;
+		    text-align: left;
+		    text-decoration: none;
+		}
+
+		.rss-feed-list-item-card-body-summary-content-desc {
+			line-height: 20px;
+		    font-size: 14px;
+		    color: rgb(106, 106, 117);
+		    -webkit-line-clamp: 3;
+		    text-align: left;
+		    text-overflow: ellipsis;
+		    display: -webkit-box;
+		    -webkit-box-orient: vertical;
+		    overflow: hidden;
+		}
+	</style>
+	<div id="rss-feed"></div>
+	<script type="text/javascript">
+
+		const PARAM_URL = 'https://ufpi.br/ultimas-noticias-srh-pgd?format=feed&type=rss';
+		const PARAM_TITLE = 'Últimas Notícias do PGD/UFPI';
+		const PARAM_RENDER_TITLE = true;
+
+
+		function renderTitle(title) {
+			const div = document.createElement('div');
+			div.textContent = title;
+			div.id = 'rss-feed-title';
+			return div;
+		}
+
+		function renderList(itens) {
+			const divBox = document.createElement('div');
+			divBox.id = 'rss-feed-scroll';
+
+			const ul = document.createElement('ul');
+			ul.id = 'rss-feed-list';
+			itens.forEach(item => renderListItem(ul, item))
+
+			divBox.appendChild(ul);
+			return divBox;
+		}
+
+		function renderListItem(ul, item) {
+			const itemContent = new window.DOMParser().parseFromString(item.description, "text/html");
+			const image = itemContent.getElementsByTagName("img");
+			const imageSrc = image.length ? image[0].getAttribute('src') : null;
+			const contents = itemContent.getElementsByTagName("p");
+			let content = '';
+			for (let i = 0; i < contents.length; i++) {
+				const val = contents[i].innerHTML;
+				if (val) {
+					content += val + '. ';
+				}
+			}
+			const regexAuthor = /.*\((.*)\)/gm;
+			const matchRegexAuthor = regexAuthor.exec(item.author);
+			const author = matchRegexAuthor != null && matchRegexAuthor.length > 1 ? matchRegexAuthor[1] : '';
+			const pubDate = new Date(item.pubDate);
+			const pubDateStr = String(pubDate.getDate()).padStart(2, '0') + '/' + String(pubDate.getMonth()+1).padStart(2, '0') + '/' + pubDate.getFullYear() + ' ' + String(pubDate.getHours()).padStart(2, '0') + ':' + String(pubDate.getMinutes()).padStart(2, '0') + ':' + String(pubDate.getSeconds()).padStart(2, '0');
+
+
+			const li = document.createElement('li');
+			li.classList.add("rss-feed-list-item");
+
+			const divCard = document.createElement('div');
+			divCard.classList.add("rss-feed-list-item-card");
+			li.appendChild(divCard);
+
+			const divCardBody = document.createElement('div');
+			divCardBody.classList.add("rss-feed-list-item-card-body");
+			divCard.appendChild(divCardBody);
+
+			if (imageSrc != null) {
+				const divCardBodyImg = document.createElement('div');
+				divCardBodyImg.classList.add("rss-feed-list-item-card-body-img");
+				divCardBody.appendChild(divCardBodyImg);
+
+				const imgLink = document.createElement('a');
+				imgLink.setAttribute('href', item.link);
+
+				const imgEl = document.createElement('img');
+				imgEl.setAttribute('src', imageSrc);
+
+				imgLink.appendChild(imgEl);
+				divCardBodyImg.appendChild(imgLink);
+
+			}
+
+			const divSummary = document.createElement('div');
+			divSummary.classList.add("rss-feed-list-item-card-body-summary");
+			divCardBody.appendChild(divSummary);
+
+			//TITLE
+			const divSummaryTitle = document.createElement('div');
+			divSummaryTitle.classList.add("rss-feed-list-item-card-body-summary-title");
+			divSummary.appendChild(divSummaryTitle);
+
+			const divSummaryTitleName = document.createElement('div');
+			divSummaryTitleName.classList.add("rss-feed-list-item-card-body-summary-title-name");
+			divSummaryTitleName.innerHTML = author;
+			divSummaryTitle.appendChild(divSummaryTitleName);
+
+			const divSummaryTitleDate = document.createElement('div');
+			divSummaryTitleDate.classList.add("rss-feed-list-item-card-body-summary-title-date");
+			divSummaryTitleDate.innerHTML = pubDateStr;
+			divSummaryTitle.appendChild(divSummaryTitleDate);
+
+			//CONTENT
+			const divSummaryContent = document.createElement('div');
+			divSummaryContent.classList.add("rss-feed-list-item-card-body-summary-content");
+			divSummary.appendChild(divSummaryContent);
+
+			const divSummaryContentTitle = document.createElement('a');
+			divSummaryContentTitle.classList.add("rss-feed-list-item-card-body-summary-content-title");
+			divSummaryContentTitle.setAttribute('href', item.link);
+			divSummaryContentTitle.innerHTML = item.title;
+			divSummaryContent.appendChild(divSummaryContentTitle);
+
+			const divSummaryContentDesc = document.createElement('div');
+			divSummaryContentDesc.classList.add("rss-feed-list-item-card-body-summary-content-desc");
+			divSummaryContentDesc.innerHTML = content;
+			divSummaryContent.appendChild(divSummaryContentDesc);
+			
+			ul.appendChild(li)
+		}
+
+		function render(itens) {
+			const root = document.getElementById('rss-feed');
+			if (PARAM_RENDER_TITLE) {
+				root.appendChild(renderTitle(PARAM_TITLE));
+			}
+			root.appendChild(renderList(itens));
+		}
+
+		fetch(PARAM_URL)
+		.then(response =>  response.text())
+		.then(str => {
+			return new window.DOMParser().parseFromString(str, "text/xml")
+		})
+		.then(data => {
+			const itensJS = [];
+			const itens = data.getElementsByTagName("item");
+			for (let i = 0; i < itens.length; i++) {
+				const item = itens[i];
+				const itemJS = {};
+				itemJS.title = item.getElementsByTagName("title")[0].innerHTML;
+				itemJS.link = item.getElementsByTagName("link")[0].innerHTML;
+				itemJS.description = item.getElementsByTagName("description")[0].innerHTML;
+				itemJS.author = item.getElementsByTagName("author")[0].innerHTML;
+				itemJS.category = item.getElementsByTagName("category")[0].innerHTML;
+				itemJS.pubDate = item.getElementsByTagName("pubDate")[0].innerHTML;
+				itensJS.push(itemJS);
+			}
+			render(itensJS);
+		});
+	</script>
+</body>
+</html>
