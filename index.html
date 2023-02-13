@@ -51,7 +51,7 @@
 			line-height: 1.4;
 			text-align: center;
 			border-bottom: 3px solid rgba(34,110,147,1);
-    		background: #f7f7f7;
+			background: #f7f7f7;
 		}
 
 		#rss-feed-list {
@@ -208,6 +208,11 @@
 			return divBox;
 		}
 
+		function addHours(date, h) {
+	  		date.setTime(date.getTime() + (h*60*60*1000));
+	  		return date;
+		}
+
 		function renderListItem(ul, item) {
 			const itemContent = new window.DOMParser().parseFromString(item.description, "text/html");
 			const image = itemContent.getElementsByTagName("img");
@@ -223,7 +228,10 @@
 			const regexAuthor = /.*\((.*)\)/gm;
 			const matchRegexAuthor = regexAuthor.exec(item.author);
 			const author = matchRegexAuthor != null && matchRegexAuthor.length > 1 ? matchRegexAuthor[1] : '';
+
+			const TIMEZONE = -3;
 			const pubDate = new Date(item.pubDate);
+			addHours(pubDate, TIMEZONE)
 			const pubDateStr = String(pubDate.getDate()).padStart(2, '0') + '/' + String(pubDate.getMonth()+1).padStart(2, '0') + '/' + pubDate.getFullYear() + ' ' + String(pubDate.getHours()).padStart(2, '0') + ':' + String(pubDate.getMinutes()).padStart(2, '0') + ':' + String(pubDate.getSeconds()).padStart(2, '0');
 
 
